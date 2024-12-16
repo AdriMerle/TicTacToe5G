@@ -7,6 +7,7 @@ function renderGrid(grid) {
             const cell = document.querySelector(`.cell[data-row="${row+1}"][data-col="${col+1}"]`)
             if (grid[row][col] === "X") cell.innerHTML = pawnCross;
             else if (grid[row][col] === "O") cell.innerHTML = pawnCircle;
+            else cell.innerHTML = "";
         }
     }
 
@@ -66,6 +67,7 @@ async function fetchData(grid) {
     const apiUrl = "http://172.24.153.108:8080/qpe/getTagData";
     const params = {
         mode: "json",
+        tag: "a4da22e1701e,a4da22e16cda"
     };
 
     // Build the query string
@@ -85,8 +87,9 @@ async function fetchData(grid) {
         // Make a new array with tag color, locationZoneNames
         const tagData = tags.map(tag => {
             return {
-            color: tag.color,
-            locationZoneNames: tag.locationZoneNames?.[0] || 'Unknown'
+                color: tag.color,
+                locationZoneNames: tag.locationZoneNames?.[0] || 'Unknown',
+                isPushed: tag.button1State === 'pushed'
             };
         });
 
@@ -94,27 +97,22 @@ async function fetchData(grid) {
         const zoneStatus = Array(9).fill("-");
 
         // Process each tag in the input data
-        tagData.forEach(({ tagGroupName, button1State }) => {
+        tagData.forEach(({ color, isPushed }) => {
             if (locationZoneNames.startsWith("Zone")) {
                 const zoneIndex = parseInt(locationZoneNames.replace("Zone", ""), 10) - 1; // Convert ZoneX to index
                 const row = Math.floor(zoneIndex / 3);
                 const col = zoneIndex % 3;
                 if (grid[row][col] === 'X' || grid[row][col] === 'O') return;
 
-                if (button1State === 'pushed') {
-                    if (tagGroupName === "GREEN") {
-                        grid[row][col] = "X";
-                    } else if (tagGroupName === "RED") {
-                        grid[row][col] = "O";
+                if (isPushed) {
+                    if (color === "#00FF33") {
+                        grid[row][col] = "X"; // green
+                    } else if (color === "#FF0000") {
+                        grid[row][col] = "O"; // red
                     }
                 }
             }
         });
-
-        const grid = [[], [], []];
-        for (let i = 0; i < 9; i++) {
-            grid[Math.floor(i / 3)][i % 3] = zoneStatus[i];
-        }
 
         return grid;
     }
@@ -137,7 +135,6 @@ function initGrid(grid) {
     grid[0] = ["X", "X", "X"];
 
     document.getElementById("retry-button").addEventListener('click', () => {
-        console.log('ok')
         initGrid(grid);
     });
 
