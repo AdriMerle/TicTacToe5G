@@ -1,0 +1,82 @@
+:root {
+    --cell-size: 150px;
+    --cell-gap: 1rem;
+    --pawn-size: 100px;
+}
+
+html, body {
+    width: 100%;
+    height: 100vh;
+    padding: 0;
+    margin: 0;
+    background-color: black;
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 3rem;
+}
+
+.grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--cell-gap);
+    width: calc(var(--cell-size)*3 + var(--cell-gap)*2);
+}
+
+
+
+.cell {
+    transition: 0.3s;
+    background-color: white;
+    width: var(--cell-size);
+    height: var(--cell-size);
+    border-radius: 5px;
+}
+
+.cell:hover {
+    transform: scale(1.04);
+}
+
+#pawn-circle, #pawn-cross {
+    display: none;
+}
+
+.pawn {
+    position: absolute;
+    width: var(--pawn-size);
+    height: var(--pawn-size);
+    transform: translateX(calc(var(--cell-size)/2 - 50%)) translateY(calc(var(--cell-size)/2 - 50%));
+}
+
+.pawn-circle {
+    color: green;
+}
+
+.pawn-cross {
+    color: red;
+}
+
+#result {
+    font-size: 2rem;
+    text-transform: uppercase;
+}
+
+#result[data-state="hidden"] {
+    display: none;
+}
+
+#result[data-state="draw"] {
+    color: grey;
+}
+
+#result[data-state="circle"] {
+    color: green;
+}
+
+#result[data-state="cross"] {
+    color: red;
+}
