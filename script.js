@@ -60,8 +60,70 @@ function checkWinner(grid) {
     return null;
 }
 
+async function fetchData() {
+    // Define the API URL and parameters
+    const apiUrl = "http://172.24.153.108:8080/qpe/getTagData";
+    const params = {
+        mode: "json",
+    };
 
-(() => {
-    const grid = [["X", "X", "X"],[0,0,"X"],[0,0,0]];
+    // Build the query string
+    const queryString = new URLSearchParams(params).toString();
+
+    // Fetch data from the API
+    try {
+        const response = await fetch(`${apiUrl}?${queryString}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = response.json();
+
+        // Get data from tags
+        const tags = data.tags;
+            
+        // Make a new array with tag color, locationZoneNames
+        const tagData = tags.map(tag => {
+            return {
+            color: tag.color,
+            locationZoneNames: tag.locationZoneNames?.[0] || 'Unknown'
+            };
+        });
+
+        // Initialize a 9-cell array with "-"
+        const zoneStatus = Array(9).fill("-");
+
+        // Process each tag in the input data
+        tagData.forEach(({ color, locationZoneNames }) => {
+            if (locationZoneNames.startsWith("Zone")) {
+                const zoneIndex = parseInt(locationZoneNames.replace("Zone", ""), 10) - 1; // Convert ZoneX to index
+                if (color === "#00FF33") {
+                    zoneStatus[zoneIndex] = "X"; // Green
+                } else if (color === "#FF0000") {
+                    zoneStatus[zoneIndex] = "O"; // Red
+                }
+            }
+        });
+
+        const grid = [[], [], []];
+        for (let i = 0; i < 9; i++) {
+            grid[Math.floor(i / 3)][i % 3] = zoneStatus[i];
+        }
+
+        return grid;
+    }
+    catch(error) {
+        console.error("Error fetching data:", error); // Handle errors
+        throw new Error(`Error: ${error}`);
+    }
+}
+
+async function run() {
+    const grid = await fetchData();
     renderGrid(grid);
+}
+
+
+(async () => {
+    run();
+    setInterval(run, 500);
 })();
