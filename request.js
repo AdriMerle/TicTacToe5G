@@ -1,28 +1,65 @@
-// URL de base de l'API Quuppa
-const baseUrl = "http://172.24.153.108:8080/qpe/getTagData";
+// Install this : https://addons.mozilla.org/en-US/firefox/addon/cors-unblock/
 
-// Paramètres de la requête
-const params = new URLSearchParams({
+// Define the API URL and parameters
+const apiUrl = "http://172.24.153.108:8080/qpe/getTagData";
+const params = {
     mode: "json",
-    tag: "a4da22e16cda"
-});
+};
 
-// Envoyer la requête GET à l'API
-fetch(`${baseUrl}?${params.toString()}`)
-    .then(response => {
-        console.log(response)
-        if (response.ok) {
-            return response.json();
-        } else {
-            throw new Error(`Erreur: ${response.status}`);
+// Build the query string
+const queryString = new URLSearchParams(params).toString();
+
+// Fetch data from the API
+fetch(`${apiUrl}?${queryString}`)
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    // Parse the JSON response
+    return response.json();
+  })
+  .then(data => {
+
+    // Get data from tags
+    const tags = data.tags;
+    
+    // Make a new array with tag color, locationZoneNames
+    const tagData = tags.map(tag => {
+        return {
+          color: tag.color,
+          locationZoneNames: tag.locationZoneNames?.[0] || 'Unknown'
+        };
+      });
+
+    // Initialize a 9-cell array with "-"
+    const zoneStatus = Array(9).fill("-");
+
+    // Process each tag in the input data
+    tagData.forEach(({ color, locationZoneNames }) => {
+    if (locationZoneNames.startsWith("Zone")) {
+        const zoneIndex = parseInt(locationZoneNames.replace("Zone", ""), 10) - 1; // Convert ZoneX to index
+        if (color === "#00FF33") {
+            zoneStatus[zoneIndex] = "X"; // Green
+        } else if (color === "#FF0000") {
+            zoneStatus[zoneIndex] = "O"; // Red
         }
-    })
-    .then(data => {
-        // Si la requête est réussie, afficher les données JSON
-        console.log(JSON.stringify(data, null, 4));
-    })
-    .catch(error => {
-        // Si la requête échoue, afficher le code d'erreur et le message
-        console.log("erreur")
-        console.error(error.message);
+    }
     });
+
+    console.log(zoneStatus); // Log the data to the
+
+    // Display the data on the webpage, 3 elements per row
+    const outputElement = document.getElementById("output");
+    zoneStatus.forEach((status, index) => {
+        if (index % 3 === 0) {
+            outputElement.appendChild(document.createElement("br"));
+        }
+        outputElement.appendChild(document.createTextNode(status));
+    });
+  })
+  .catch(error => {
+    console.error("Error fetching data:", error); // Handle errors
+    const outputElement = document.getElementById("output");
+    outputElement.textContent = `Error fetching data: ${error.message}`;
+  });
