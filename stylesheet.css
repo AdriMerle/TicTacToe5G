@@ -61,22 +61,43 @@ html, body {
 }
 
 #result {
-    font-size: 2rem;
+    position: absolute;
+    top: 50px;
+    transition: 0.5s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+#result-text {
+    font-size: 2.5rem;
     text-transform: uppercase;
+    font-weight: bold;
 }
 
 #result[data-state="hidden"] {
-    display: none;
+    top: -50px;
 }
 
-#result[data-state="draw"] {
+#result[data-state="draw"] * {
     color: grey;
 }
 
-#result[data-state="circle"] {
+#result[data-state="circle"] *  {
     color: green;
 }
 
-#result[data-state="cross"] {
+#result[data-state="cross"] *  {
     color: red;
+}
+
+#retry-button {
+    width: 3rem;
+    transition: 0.5s;
+}
+
+#retry-button:hover {
+    width: 3.5rem;
+    transform: rotate(360deg);
 }
