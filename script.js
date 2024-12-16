@@ -94,12 +94,9 @@ async function fetchData(grid) {
         });
 
         // Process each tag in the input data
-        tagData.forEach(({ color, isPushed }) => {
+        tagData.forEach(({ color, locationZoneNames, isPushed }) => {
             if (locationZoneNames.startsWith("Zone")) {
-                const zoneIndex = parseInt(locationZoneNames.replace("Zone", ""), 10) - 1; // Convert ZoneX to index
-                if (zoneStatus[zoneIndex] !== "-") {
-                    return;
-                }
+                
                 const row = Math.floor(zoneIndex / 3);
                 const col = zoneIndex % 3;
                 if (grid[row][col] === 'X' || grid[row][col] === 'O') return;
