@@ -93,13 +93,13 @@ async function fetchData(grid) {
             };
         });
 
-        // Initialize a 9-cell array with "-"
-        const zoneStatus = Array(9).fill("-");
-
         // Process each tag in the input data
         tagData.forEach(({ color, isPushed }) => {
             if (locationZoneNames.startsWith("Zone")) {
                 const zoneIndex = parseInt(locationZoneNames.replace("Zone", ""), 10) - 1; // Convert ZoneX to index
+                if (zoneStatus[zoneIndex] !== "-") {
+                    return;
+                }
                 const row = Math.floor(zoneIndex / 3);
                 const col = zoneIndex % 3;
                 if (grid[row][col] === 'X' || grid[row][col] === 'O') return;
@@ -139,6 +139,7 @@ function initGrid(grid) {
     });
 
     setInterval(async () => {
+        fetchData(grid);
         renderGrid(grid);
     }, 500);
 })();
